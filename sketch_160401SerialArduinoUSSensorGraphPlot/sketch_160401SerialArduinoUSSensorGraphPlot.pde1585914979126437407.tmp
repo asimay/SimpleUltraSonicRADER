@@ -1,0 +1,66 @@
+/*
+Arduino Processing serial communication
+ processing side sample
+ 
+ http://yoppa.org/tau_bmaw13/4770.html
+ Plot graph of data from Sensors on Arduino
+ */
+
+import processing.serial.*;
+int NUM = 2;
+Serial myPort;
+
+int[] sensors = new int[NUM];
+int cnt; //counter
+
+color[] col = new color[6];
+
+float r;
+float theta;
+
+void setup() {
+  size(400, 400);
+
+  myPort = new Serial(this, "COM34", 9600); //Serial.list()[0]
+  myPort.bufferUntil('\n');
+  initGraph();
+}   
+
+void draw() {
+  fill(col[0]);
+  float x = r * cos(theta);
+  float y = r * sin(theta);
+
+  float tx = map(cnt, 0, width, 0, width);
+  
+  ellipse(tx, ty, 4, 4);
+
+  if (cnt > width) {
+    initGraph();
+  }
+  cnt++;
+}
+
+void initGraph() {
+  background(47);
+  noStroke();
+  cnt = 0;
+  col[0] = color(255, 0, 0);
+  col[1] = color(0, 255, 0);
+  col[2] = color(0, 0, 255);
+  col[3] = color(31, 127, 255);
+  col[4] = color(127, 255, 31);
+  col[5] = color(127);
+}
+
+void serialEvent(Serial myPort) {
+  String myString = myPort.readStringUntil('\n');
+  myString = trim(myString);
+  println(myString);
+  int tmp[] = int(split(myString, ','));
+  if (tmp.length > 1) {
+    for (int i = 0; i < NUM; i++) {
+      sensors[i] = tmp[i];
+    }
+  }
+}
